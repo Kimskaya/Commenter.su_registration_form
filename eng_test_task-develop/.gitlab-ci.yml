@@ -1,0 +1,46 @@
+stages:
+  - build
+  - run
+
+build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  allow_failure: false
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker build --build-arg SIGN_IN_EMAIL=${SIGN_IN_EMAIL} --build-arg SIGN_IN_PASSWORD=${SIGN_IN_PASSWORD} -t ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_NAME}:latest .
+    - docker push ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_NAME}:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE != "pipeline" && $CI_PIPELINE_SOURCE != "web"
+      changes:
+        - .gitlab-ci.yml
+        - Dockerfile
+        - .dockerignore
+        - poetry.lock
+        - pyproject.toml
+
+run:
+  stage: run
+  image: ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_NAME}:latest
+  environment: ${CI_COMMIT_REF_NAME}
+  allow_failure: false
+  dependencies:
+    - build
+  before_script:
+    - echo -e "\e[0Ksection_start:`date +%s`:export_section[collapsed=true]\r\e[0KEnvs"
+    - export
+    - echo -e "\e[0Ksection_end:`date +%s`:export_section\r\e[0K"
+  script:
+    - cd /application/src
+    - pytest --tracing on
+    - cp -r /app/test-results/ ${CI_PROJECT_DIR}/test-results/
+  variables:
+    CI: "false"
+  artifacts:
+    paths:
+      - test-results/

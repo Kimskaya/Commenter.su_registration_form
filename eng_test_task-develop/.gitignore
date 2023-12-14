@@ -1,0 +1,8 @@
+/venv/
+.python-version
+.pytest_cache
+*.pyc
+.idea
+tmp/
+.ruff_cache
+test-results/

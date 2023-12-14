@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "app"
+version = "1.0.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.11.0"
+pytest-playwright = "^0.4.3"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.10.1"
+ruff = "^0.1.7"
+
+[pytest]
+pythonpath = "."
+
+[tool.ruff]
+exclude = [".pytest_cache", ".ruff_cache", "tmp"]
+target-version = "py311"
+line-length = 120
+indent-width = 4
+select = ["E", "F", "I", "UP", "S"]
+ignore = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+detect-same-package = true
+split-on-trailing-comma = true
+known-first-party = ["application"]
+known-third-party = ["aiobotocore", "aiokafka", "alembic", "click", "fastapi", "httpx", "hvac", "json_log_formatter", "mock", "prometheus_fastapi_instrumentator", "pydantic", "pytest", "pytest_mock", "respx", "rocketry", "sentry_sdk", "sqlalchemy", "sqlalchemy_utils", "starlette", "uvicorn"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
